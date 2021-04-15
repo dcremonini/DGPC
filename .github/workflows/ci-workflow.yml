@@ -7,7 +7,6 @@ jobs:
   lint_and_test:
     runs-on: ubuntu-latest
 
-
     steps:
 
     - uses: actions/checkout@v2
@@ -24,7 +23,7 @@ jobs:
 
     - name: Lint with mypy and pylint
       run: |
-        pip install mypy==0.770 pylint==2.5.0
+        pip install mypy==0.812 pylint==2.7.4
         ./scripts/linters.sh
 
     - name: Test with pytest
