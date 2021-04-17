@@ -3,7 +3,7 @@ from unittest import TestCase
 import pytest
 
 from src.csvparser.csvparser import LanguageDetector
-from src.degiro import CSV_HEADER
+from src.degiro import CSV_HEADER_NL
 from src.language.language import Languages
 
 
@@ -15,4 +15,4 @@ class TestLanguageDetector(TestCase):
 
     def test_get_NL_language_from_header(self):
         assert LanguageDetector.getLanguageFromHeader(
-            CSV_HEADER) == Languages.NL, "The Dutch header is not recognized as NL"
+            CSV_HEADER_NL) == Languages.NL, "The Dutch header is not recognized as NL"
