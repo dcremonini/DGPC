@@ -79,13 +79,13 @@ def dgpc(input_file: Path, output_png: Path, output_csv: Path, end_date: datetim
     print(f"[DGPC] Reading DeGiro data from '{input_file}'")
 
     csv_file_reader = CSVFileReader()
-    csv_data, first_date = csv_file_reader.read_account(input_file)
+    first_date = csv_file_reader.read_account(input_file)
 
     num_days = (end_date - first_date).days
     dates = [first_date + datetime.timedelta(days=days) for days in range(0, num_days)]
 
     # Parse the DeGiro account data
-    print(f"[DGPC] Parsing DeGiro data with {len(csv_data)} rows from {dates[0]} till {dates[-1]}")
+    print(f"[DGPC] Parsing DeGiro data with {len(csv_file_reader.csv_data)} rows from {dates[0]} till {dates[-1]}")
     absolute_data, relative_data = csv_file_reader.parse_account(dates)
 
     # Filter out all values before the chosen 'start_date' (default: today)
