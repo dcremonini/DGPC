@@ -17,20 +17,18 @@ class CSVFileReader:
     SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
     # ... ano others, not complete of course
 
+    def read_account(account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
+        """Opens a DeGiro 'Account.csv' file and returns the contents as well as the first date"""
+        csv_data = list(csv.reader(account_csv.open()))
+        if csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
+            raise RuntimeError(f"Error while parsing '{account_csv}' file, unexpected header"
+                               f"\nFound: {csv_data[0]}\nExpected: {CSVFileReader.CSV_HEADER_NL.split(',')}")
+        first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
+        return csv_data, first_date
+
     pass
 
 
-
-
-
-def read_account(account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
-    """Opens a DeGiro 'Account.csv' file and returns the contents as well as the first date"""
-    csv_data = list(csv.reader(account_csv.open()))
-    if csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
-        raise RuntimeError(f"Error while parsing '{account_csv}' file, unexpected header"
-                           f"\nFound: {csv_data[0]}\nExpected: {CSVFileReader.CSV_HEADER_NL.split(',')}")
-    first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
-    return csv_data, first_date
 
 
 def parse_single_row(row: List[str], dates: Sequence[datetime.date], date_index: int,
