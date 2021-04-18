@@ -18,7 +18,7 @@ class CSVFileReader:
 
     # ... ano others, not complete of course
 
-    def read_account(account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
+    def read_account(self, account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
         """Opens a DeGiro 'Account.csv' file and returns the contents as well as the first date"""
         csv_data = list(csv.reader(account_csv.open()))
         if csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
@@ -27,9 +27,8 @@ class CSVFileReader:
         first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
         return csv_data, first_date
 
-
-    def parse_account(csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
-                                                                                      Dict[str, np.ndarray]]:
+    def parse_account(self, csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
+                                                                                            Dict[str, np.ndarray]]:
         """Parses the csv-data and constructs NumPy arrays for the given date range with cash value, total account value,
         and total invested."""
 
@@ -65,8 +64,8 @@ class CSVFileReader:
             if stop_parsing:
                 break
 
-            CSVFileReader.parse_single_row(row, tuple(dates), date_index,
-                                           invested, cash, shares_value, bank_cash)
+            self.parse_single_row(row, tuple(dates), date_index,
+                                  invested, cash, shares_value, bank_cash)
 
         # Set the absolute value metrics
         total_account = shares_value + cash
@@ -80,8 +79,7 @@ class CSVFileReader:
         relatives = {"account performance": performance}
         return absolutes, relatives
 
-
-    def parse_single_row(row: List[str], dates: Sequence[datetime.date], date_index: int,
+    def parse_single_row(self, row: List[str], dates: Sequence[datetime.date], date_index: int,
                          invested: np.ndarray, cash: np.ndarray, shares_value: np.ndarray,
                          bank_cash: np.ndarray) -> None:
         """Parses a single row of the CSV data, updating all the NumPy arrays (they are both input and output)."""
@@ -172,5 +170,3 @@ class CSVFileReader:
         else:
             print(f"[DGPC] {date}: Unsupported type of entry '{description}', contents:")
             print(row)
-
-
