@@ -30,8 +30,8 @@ class CSVFileReader:
         first_date = datetime.datetime.strptime(self.csv_data[-1][0], "%d-%m-%Y").date()
         return self.csv_data, first_date
 
-    def parse_account(self, csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
-                                                                                            Dict[str, np.ndarray]]:
+    def parse_account(self, dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
+                                                                 Dict[str, np.ndarray]]:
         """Parses the csv-data and constructs NumPy arrays for the given date range with cash value, total account value,
         and total invested."""
 
@@ -49,7 +49,7 @@ class CSVFileReader:
         # Parse the CSV data
         date_index = 0
         stop_parsing = False
-        for row in csv_data[1:][::-1]:
+        for row in self.csv_data[1:][::-1]:
 
             # Retrieves the data of this CSV row
             if row[0] == "":
