@@ -18,14 +18,17 @@ class CSVFileReader:
 
     # ... ano others, not complete of course
 
+    def __init__(self):
+        self.csv_data: List[List[str]] = None
+
     def read_account(self, account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
         """Opens a DeGiro 'Account.csv' file and returns the contents as well as the first date"""
-        csv_data = list(csv.reader(account_csv.open()))
-        if csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
+        self.csv_data = list(csv.reader(account_csv.open()))
+        if self.csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
             raise RuntimeError(f"Error while parsing '{account_csv}' file, unexpected header"
-                               f"\nFound: {csv_data[0]}\nExpected: {CSVFileReader.CSV_HEADER_NL.split(',')}")
-        first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
-        return csv_data, first_date
+                               f"\nFound: {self.csv_data[0]}\nExpected: {CSVFileReader.CSV_HEADER_NL.split(',')}")
+        first_date = datetime.datetime.strptime(self.csv_data[-1][0], "%d-%m-%Y").date()
+        return self.csv_data, first_date
 
     def parse_account(self, csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
                                                                                             Dict[str, np.ndarray]]:
