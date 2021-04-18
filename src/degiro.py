@@ -27,6 +27,60 @@ class CSVFileReader:
         first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
         return csv_data, first_date
 
+
+    def parse_account(csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
+                                                                                      Dict[str, np.ndarray]]:
+        """Parses the csv-data and constructs NumPy arrays for the given date range with cash value, total account value,
+        and total invested."""
+
+        # Initial values
+        num_days = len(dates)
+        invested = np.zeros(shape=num_days)
+        cash = np.zeros(shape=num_days)
+        shares_value = np.zeros(shape=num_days)
+
+        # We make the assumption that any money going out of the DeGiro account is still on a bank and thus counted here
+        # as cash. This value holds the amount of money on the bank at a given time while parsing, with future cash
+        # deposits reducing this value.
+        bank_cash = np.zeros(shape=num_days)
+
+        # Parse the CSV data
+        date_index = 0
+        stop_parsing = False
+        for row in csv_data[1:][::-1]:
+
+            # Retrieves the data of this CSV row
+            if row[0] == "":
+                continue
+            date = datetime.datetime.strptime(row[0], "%d-%m-%Y").date()
+
+            # Advance the date till we reach the date of the CSV entry
+            while date != dates[date_index]:
+                date_index += 1
+                if date_index == num_days:
+                    print(f"[DGPC] Warning, CSV date {date} larger than dates range (up to {dates[-1]}), skipping data")
+                    stop_parsing = True
+                    break
+
+            if stop_parsing:
+                break
+
+            CSVFileReader.parse_single_row(row, tuple(dates), date_index,
+                                           invested, cash, shares_value, bank_cash)
+
+        # Set the absolute value metrics
+        total_account = shares_value + cash
+        absolutes = {"nominal account (without profit/loss)": invested,
+                     "cash in DeGiro account": cash,
+                     "total account value": total_account}
+
+        # Set the relative metrics
+        performance = np.divide(total_account, invested, out=np.zeros_like(invested), where=invested != 0)
+
+        relatives = {"account performance": performance}
+        return absolutes, relatives
+
+
     def parse_single_row(row: List[str], dates: Sequence[datetime.date], date_index: int,
                          invested: np.ndarray, cash: np.ndarray, shares_value: np.ndarray,
                          bank_cash: np.ndarray) -> None:
@@ -120,54 +174,3 @@ class CSVFileReader:
             print(row)
 
 
-def parse_account(csv_data: List[List[str]], dates: List[datetime.date]) -> Tuple[Dict[str, np.ndarray],
-                                                                                  Dict[str, np.ndarray]]:
-    """Parses the csv-data and constructs NumPy arrays for the given date range with cash value, total account value,
-    and total invested."""
-
-    # Initial values
-    num_days = len(dates)
-    invested = np.zeros(shape=num_days)
-    cash = np.zeros(shape=num_days)
-    shares_value = np.zeros(shape=num_days)
-
-    # We make the assumption that any money going out of the DeGiro account is still on a bank and thus counted here
-    # as cash. This value holds the amount of money on the bank at a given time while parsing, with future cash
-    # deposits reducing this value.
-    bank_cash = np.zeros(shape=num_days)
-
-    # Parse the CSV data
-    date_index = 0
-    stop_parsing = False
-    for row in csv_data[1:][::-1]:
-
-        # Retrieves the data of this CSV row
-        if row[0] == "":
-            continue
-        date = datetime.datetime.strptime(row[0], "%d-%m-%Y").date()
-
-        # Advance the date till we reach the date of the CSV entry
-        while date != dates[date_index]:
-            date_index += 1
-            if date_index == num_days:
-                print(f"[DGPC] Warning, CSV date {date} larger than dates range (up to {dates[-1]}), skipping data")
-                stop_parsing = True
-                break
-
-        if stop_parsing:
-            break
-
-        CSVFileReader.parse_single_row(row, tuple(dates), date_index,
-                                       invested, cash, shares_value, bank_cash)
-
-    # Set the absolute value metrics
-    total_account = shares_value + cash
-    absolutes = {"nominal account (without profit/loss)": invested,
-                 "cash in DeGiro account": cash,
-                 "total account value": total_account}
-
-    # Set the relative metrics
-    performance = np.divide(total_account, invested, out=np.zeros_like(invested), where=invested != 0)
-
-    relatives = {"account performance": performance}
-    return absolutes, relatives
