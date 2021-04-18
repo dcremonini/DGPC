@@ -13,13 +13,14 @@ class CSVFileReader:
     # Header of the Account.csv file from DeGiro export
     CSV_HEADER_NL = "Datum,Tijd,Valutadatum,Product,ISIN,Omschrijving,FX,Mutatie,,Saldo,,Order Id"
 
+    # If any of these words (case agnostic) are found in a shares name, it is considered to be an ETF
+    SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
+    # ... ano others, not complete of course
+
     pass
 
 
 
-# If any of these words (case agnostic) are found in a shares name, it is considered to be an ETF
-SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
-# ... ano others, not complete of course
 
 
 def read_account(account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
@@ -60,7 +61,7 @@ def parse_single_row(row: List[str], dates: Sequence[datetime.date], date_index:
         buy_or_sell = "sell" if description.split(" ")[0] == "Verkoop" else "buy"
         multiplier = -1 if buy_or_sell == "sell" else 1
         num_shares = int(description.split(" ")[1].replace(".", ""))
-        is_etf = any([etf_subname.lower() in name.lower() for etf_subname in SUBSTRINGS_IN_ETF])
+        is_etf = any([etf_subname.lower() in name.lower() for etf_subname in CSVFileReader.SUBSTRINGS_IN_ETF])
         this_share_value, _ = market.get_data_by_isin(isin, dates, is_etf=is_etf)
         if this_share_value is None:  # no historical prices available for this stock/etf
             this_share_value = np.zeros(shape=len(dates)) + (-mutation / num_shares)
