@@ -9,8 +9,13 @@ import numpy as np
 from . import market
 
 
-# Header of the Account.csv file from DeGiro export
-CSV_HEADER_NL = "Datum,Tijd,Valutadatum,Product,ISIN,Omschrijving,FX,Mutatie,,Saldo,,Order Id"
+class CSVFileReader:
+    # Header of the Account.csv file from DeGiro export
+    CSV_HEADER_NL = "Datum,Tijd,Valutadatum,Product,ISIN,Omschrijving,FX,Mutatie,,Saldo,,Order Id"
+
+    pass
+
+
 
 # If any of these words (case agnostic) are found in a shares name, it is considered to be an ETF
 SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
@@ -20,9 +25,9 @@ SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "
 def read_account(account_csv: Path) -> Tuple[List[List[str]], datetime.date]:
     """Opens a DeGiro 'Account.csv' file and returns the contents as well as the first date"""
     csv_data = list(csv.reader(account_csv.open()))
-    if csv_data[0] != CSV_HEADER_NL.split(","):
+    if csv_data[0] != CSVFileReader.CSV_HEADER_NL.split(","):
         raise RuntimeError(f"Error while parsing '{account_csv}' file, unexpected header"
-                           f"\nFound: {csv_data[0]}\nExpected: {CSV_HEADER_NL.split(',')}")
+                           f"\nFound: {csv_data[0]}\nExpected: {CSVFileReader.CSV_HEADER_NL.split(',')}")
     first_date = datetime.datetime.strptime(csv_data[-1][0], "%d-%m-%Y").date()
     return csv_data, first_date
 
