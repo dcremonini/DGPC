@@ -15,8 +15,7 @@ class CSVFileReader:
 
     # If any of these words (case agnostic) are found in a shares name, it is considered to be an ETF
     SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
-
-    # ... ano others, not complete of course
+    # ... and others, not complete of course
 
     def __init__(self):
         self.csv_data: List[List[str]] = None
@@ -111,7 +110,7 @@ class CSVFileReader:
             buy_or_sell = "sell" if description.split(" ")[0] == "Verkoop" else "buy"
             multiplier = -1 if buy_or_sell == "sell" else 1
             num_shares = int(description.split(" ")[1].replace(".", ""))
-            is_etf = any([etf_subname.lower() in name.lower() for etf_subname in CSVFileReader.SUBSTRINGS_IN_ETF])
+            is_etf = self.is_title_etf(name)
             this_share_value, _ = market.get_data_by_isin(isin, dates, is_etf=is_etf)
             if this_share_value is None:  # no historical prices available for this stock/etf
                 this_share_value = np.zeros(shape=len(dates)) + (-mutation / num_shares)
@@ -173,3 +172,6 @@ class CSVFileReader:
         else:
             print(f"[DGPC] {date}: Unsupported type of entry '{description}', contents:")
             print(row)
+
+    def is_title_etf(self, name):
+        return any([etf_subname.lower() in name.lower() for etf_subname in CSVFileReader.SUBSTRINGS_IN_ETF])
