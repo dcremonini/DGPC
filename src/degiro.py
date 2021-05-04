@@ -17,7 +17,7 @@ class CSVFileReader:
     SUBSTRINGS_IN_ETF = ["Amundi", "X-TR", "ETFS", "ISHARES", "LYXOR", "Vanguard", "WISDOMTR"]
     # ... and others, not complete of course
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.csv_data: List[List[str]] = None
 
     def read_account(self, account_csv: Path) -> datetime.date:
@@ -173,5 +173,5 @@ class CSVFileReader:
             print(f"[DGPC] {date}: Unsupported type of entry '{description}', contents:")
             print(row)
 
-    def is_title_etf(self, name):
+    def is_title_etf(self, name) -> bool:
         return any([etf_subname.lower() in name.lower() for etf_subname in CSVFileReader.SUBSTRINGS_IN_ETF])
